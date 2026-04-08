@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TD
     START([User opens app]) --> AUTH{Authenticated?}
-    AUTH -- No --> LOGIN[/login\nLogin Page/]
+    AUTH -- No --> LOGIN["/login\nLogin Page"]
     AUTH -- Yes --> DASH
 
     LOGIN -- Enter API key + email --> SUBMIT_LOGIN[POST /v1/auth/login]
@@ -13,7 +13,7 @@ flowchart TD
     SUBMIT_LOGIN -- Failure --> LOGIN_ERR[Show error message]
     LOGIN_ERR --> LOGIN
 
-    DASH[/dashboard\nDashboard — Projects Tab/]
+    DASH["/dashboard\nDashboard - Projects Tab"]
 
     DASH --> HAS_PROJECTS{Has projects?}
     HAS_PROJECTS -- No --> NEW_PROJ_CTA[Click + New Project]
@@ -30,7 +30,7 @@ flowchart TD
     PREFLIGHT_CHECK -- No --> RUN_PREFLIGHT[Click Check on card]
     PREFLIGHT_CHECK -- Yes, green/amber --> READY_TO_RUN[Run button enabled]
     PREFLIGHT_CHECK -- Yes, red --> BLOCKED[Run button disabled\nTooltip: Endpoint unreachable]
-    BLOCKED --> EDIT_PROJECT[Click ✎ Edit project\nFix endpoint or auth]
+    BLOCKED --> EDIT_PROJECT[Click Edit project\nFix endpoint or auth]
     EDIT_PROJECT --> NEW_PROJ_FORM
 
     RUN_PREFLIGHT --> POST_PREFLIGHT[POST /v1/projects/:id/preflight]
@@ -43,7 +43,7 @@ flowchart TD
     LAUNCH_MODAL -- Click Launch --> POST_RUN[POST /v1/runs]
     POST_RUN -- Error --> LAUNCH_ERR[Show error in modal]
     LAUNCH_ERR --> LAUNCH_MODAL
-    POST_RUN -- 202 Accepted → run_id --> NAVIGATE_SIM
+    POST_RUN -- 202 Accepted (run_id) --> NAVIGATE_SIM
 
     NAVIGATE_SIM[Navigate to /runs/:runId\nLive Simulation View]
 
@@ -65,20 +65,20 @@ flowchart TD
     EVAL_SPINNER --> POLL_STATUS[Poll GET /v1/runs/:id every 5s]
     POLL_STATUS -- status=complete, score arrived --> SCORE_REVEAL
 
-    SCORE_REVEAL[Score Reveal Overlay\nCount-up animation 0 → score\nPASSED / FAILED badge]
+    SCORE_REVEAL[Score Reveal Overlay\nCount-up animation 0 -> score\nPASSED / FAILED badge]
 
     SCORE_REVEAL --> SCORE_DECISION{User choice}
     SCORE_DECISION -- View Full Report --> REPORT_PAGE
     SCORE_DECISION -- Back to Dashboard --> DASH
 
-    REPORT_PAGE[/runs/:runId/report\nReport View\nGET /v1/reports/:id]
+    REPORT_PAGE["/runs/:runId/report\nReport View\nGET /v1/reports/:id"]
 
     REPORT_PAGE --> VIEW_REPORT[See ScoreRing + Dimension breakdown\n+ Findings list]
     VIEW_REPORT --> EXPAND_FINDINGS[Expand FindingCards\nSee prompt vectors + responses]
     VIEW_REPORT --> FILTER_FINDINGS[Filter by severity / finding type]
     VIEW_REPORT --> EXPORT_JSON[Export JSON Artifact\nclient-side download]
     VIEW_REPORT --> DOWNLOAD_PDF[Download PDF Report\nGET /v1/reports/:id/pdf]
-    VIEW_REPORT --> BACK_DASH[← Back to Dashboard]
+    VIEW_REPORT --> BACK_DASH[Back to Dashboard]
     BACK_DASH --> DASH
 
     DASH --> RUN_HISTORY_TAB[Click Run History tab]
