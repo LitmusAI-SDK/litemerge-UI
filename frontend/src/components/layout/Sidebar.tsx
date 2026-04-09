@@ -44,7 +44,7 @@ export default function Sidebar() {
           <span>Dashboard</span>
         </NavLink>
 
-        <NavLink to="/projects"
+        <NavLink to="/dashboard?tab=projects"
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-sm ${
               isActive ? "font-bold border-r-2" : "hover:bg-[#2d3449]"
@@ -59,7 +59,7 @@ export default function Sidebar() {
           <span>Projects</span>
         </NavLink>
 
-        <NavLink to="/history"
+        <NavLink to="/dashboard?tab=history"
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-sm ${
               isActive ? "font-bold border-r-2" : "hover:bg-[#2d3449]"

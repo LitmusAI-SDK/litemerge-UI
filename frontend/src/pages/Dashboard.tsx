@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useProjects } from "../hooks/useProjects";
 import ProjectCard from "../components/projects/ProjectCard";
 import NewProjectSheet from "../components/projects/NewProjectSheet";
@@ -10,7 +11,13 @@ type Tab = "projects" | "history";
 
 export default function Dashboard() {
   const { projects, loading, error, refresh } = useProjects();
-  const [tab, setTab] = useState<Tab>("projects");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTab = searchParams.get("tab");
+  const tab: Tab = rawTab === "history" ? "history" : "projects";
+
+  function setTab(t: Tab) {
+    setSearchParams({ tab: t }, { replace: true });
+  }
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [launchProject, setLaunchProject] = useState<Project | null>(null);
