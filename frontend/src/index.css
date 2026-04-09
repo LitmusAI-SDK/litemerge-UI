@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Stitch color tokens (matches Stitch HTML exactly) ───────── */
+  --color-background:                  #0b1326;
+  --color-surface:                     #0b1326;
+  --color-surface-dim:                 #0b1326;
+  --color-surface-container-lowest:    #060e20;
+  --color-surface-container-low:       #131b2e;
+  --color-surface-container:           #171f33;
+  --color-surface-container-high:      #222a3d;
+  --color-surface-container-highest:   #2d3449;
+  --color-surface-variant:             #2d3449;
+  --color-surface-bright:              #31394d;
+  --color-surface-tint:                #adc6ff;
+
+  --color-on-background:               #dae2fd;
+  --color-on-surface:                  #dae2fd;
+  --color-on-surface-variant:          #c2c6d6;
+  --color-inverse-surface:             #dae2fd;
+  --color-inverse-on-surface:          #283044;
+
+  --color-primary:                     #adc6ff;
+  --color-primary-fixed:               #d8e2ff;
+  --color-primary-fixed-dim:           #adc6ff;
+  --color-primary-container:           #4d8eff;
+  --color-on-primary:                  #002e6a;
+  --color-on-primary-container:        #00285d;
+  --color-on-primary-fixed:            #001a42;
+  --color-on-primary-fixed-variant:    #004395;
+  --color-inverse-primary:             #005ac2;
+
+  --color-secondary:                   #d0bcff;
+  --color-secondary-fixed:             #e9ddff;
+  --color-secondary-fixed-dim:         #d0bcff;
+  --color-secondary-container:         #571bc1;
+  --color-on-secondary:                #3c0091;
+  --color-on-secondary-container:      #c4abff;
+  --color-on-secondary-fixed:          #23005c;
+  --color-on-secondary-fixed-variant:  #5516be;
+
+  --color-tertiary:                    #4edea3;
+  --color-tertiary-fixed:              #6ffbbe;
+  --color-tertiary-fixed-dim:          #4edea3;
+  --color-tertiary-container:          #00a572;
+  --color-on-tertiary:                 #003824;
+  --color-on-tertiary-container:       #00311f;
+  --color-on-tertiary-fixed:           #002113;
+  --color-on-tertiary-fixed-variant:   #005236;
+
+  --color-error:                       #ffb4ab;
+  --color-error-container:             #93000a;
+  --color-on-error:                    #690005;
+  --color-on-error-container:          #ffdad6;
+
+  --color-outline:                     #8c909f;
+  --color-outline-variant:             #424754;
+
+  /* ── Font Families ─────────────────────────────────────────── */
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body:     "Inter", sans-serif;
+  --font-label:    "Inter", sans-serif;
+  --font-mono:     "JetBrains Mono", "Fira Code", monospace;
+  --font-technical: "JetBrains Mono", monospace;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #0b1326;
+  color: #dae2fd;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+}
+
+.font-space-grotesk { font-family: "Space Grotesk", sans-serif; }
+.glass-card    { background: rgba(45,52,73,0.7); backdrop-filter: blur(12px); }
+.glass-panel   { background: rgba(45,52,73,0.7); backdrop-filter: blur(12px); }
+.glass-overlay { background: rgba(45,52,73,0.7); backdrop-filter: blur(12px); }
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Scrollbar — thin, tonal */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #2d3449; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #31394d; }
+
+/* Selection */
+::selection { background: rgba(173,198,255,0.2); color: #f1f5f9; }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid rgba(173,198,255,0.5);
+  outline-offset: 2px;
+}
+
+/* Range input */
+input[type=range]::-webkit-slider-runnable-track {
+  background: #131b2e; height: 4px; border-radius: 2px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+  background: #adc6ff; margin-top: -6px; cursor: pointer;
+  box-shadow: 0 0 10px rgba(173,198,255,0.4);
+}
+
+/* Primary gradient utility */
+.primary-gradient { background: linear-gradient(135deg, #adc6ff 0%, #4d8eff 100%); }
+
+@keyframes pulse-primary {
+  0%   { box-shadow: 0 0 0 0   rgba(173,198,255,0.4); }
+  70%  { box-shadow: 0 0 0 6px rgba(173,198,255,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(173,198,255,0);   }
+}
+.status-pulse { animation: pulse-primary 2s infinite; }
