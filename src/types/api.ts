@@ -48,12 +48,17 @@ export interface SessionStatus {
 }
 export interface Run {
   run_id: string;
+  project_id?: string;
+  test_suite?: TestSuite;
   status: RunStatus;
   score?: number | null;
   passed?: boolean | null;
+  fail_threshold?: number;
   report_url?: string | null;
   summary?: RunSummary | null;
   session_statuses: SessionStatus[];
+  created_at?: string;
+  completed_at?: string | null;
 }
 
 // ─── Reports ────────────────────────────────────────────────────

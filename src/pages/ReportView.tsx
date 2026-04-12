@@ -2,11 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getReport } from "../lib/api/reports";
+import { getRunSessions } from "../lib/api/runs";
 import type { RunReport } from "../types/api";
+import type { SessionLog } from "../lib/api/runs";
 import ReportHeader from "../components/reports/ReportHeader";
 import ScoreRing from "../components/reports/ScoreRing";
 import DimensionBreakdown from "../components/reports/DimensionBreakdown";
 import FindingsList from "../components/reports/FindingsList";
+import ConversationLogs from "../components/reports/ConversationLogs";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -45,6 +48,8 @@ export default function ReportView() {
   const [report, setReport] = useState<RunReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<SessionLog[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(true);
 
   useEffect(() => {
     if (!runId || !token) return;
@@ -54,6 +59,12 @@ export default function ReportView() {
       .then(setReport)
       .catch((e) => setError(e.message ?? "Failed to load report"))
       .finally(() => setLoading(false));
+
+    setSessionsLoading(true);
+    getRunSessions(runId, token)
+      .then(setSessions)
+      .catch(() => setSessions([]))
+      .finally(() => setSessionsLoading(false));
   }, [runId, token]);
 
   const handleExportJson = useCallback(() => {
@@ -174,7 +185,7 @@ export default function ReportView() {
 
       {/* ── Findings List ── */}
       <div
-        className="rounded-lg p-8"
+        className="rounded-lg p-8 mb-8"
         style={{ backgroundColor: "#131b2e" }}
       >
         <SectionTitle>Findings ({report.findings_count})</SectionTitle>
@@ -185,6 +196,15 @@ export default function ReportView() {
         ) : (
           <FindingsList findings={report.findings} />
         )}
+      </div>
+
+      {/* ── Conversation Logs ── */}
+      <div
+        className="rounded-lg p-8"
+        style={{ backgroundColor: "#131b2e" }}
+      >
+        <SectionTitle>Conversation Logs ({sessions.length} session{sessions.length !== 1 ? "s" : ""})</SectionTitle>
+        <ConversationLogs sessions={sessions} loading={sessionsLoading} />
       </div>
     </div>
   );

@@ -27,3 +27,22 @@ export function listRuns(token: string, projectId?: string): Promise<Run[]> {
   const qs = projectId ? `?project_id=${projectId}` : "";
   return apiFetch<Run[]>(`/v1/runs${qs}`, {}, token);
 }
+
+export interface ConversationTurn {
+  turn_index: number;
+  persona_message: string;
+  agent_response: string;
+}
+
+export interface SessionLog {
+  persona_id: string;
+  persona_name: string | null;
+  persona_type: string | null;
+  status: "in_progress" | "completed" | "failed";
+  turns_completed: number;
+  turns: ConversationTurn[];
+}
+
+export function getRunSessions(runId: string, token: string): Promise<SessionLog[]> {
+  return apiFetch<SessionLog[]>(`/v1/runs/${runId}/sessions`, {}, token);
+}
