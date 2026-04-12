@@ -23,7 +23,7 @@ This document is the authoritative implementation plan for the LitmusAI Next.js 
 ## 2. Folder Structure
 
 ```
-frontend/
+./
 ├── app/
 │   ├── layout.tsx                  # Root layout — font, ThemeProvider
 │   ├── page.tsx                    # Redirect → /dashboard or /login
@@ -362,7 +362,7 @@ export function scoreToBg(score: number): string {
 ## 9. Development Environment
 
 ```bash
-# From frontend/
+# From repository root
 npx create-next-app@latest . --typescript --tailwind --app --src-dir=no --import-alias="@/*"
 npx shadcn-ui@latest init
 npm run dev    # http://localhost:3000
