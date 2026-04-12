@@ -301,7 +301,7 @@ body {
 ## 3. Folder Structure
 
 ```
-frontend/
+./
 ├── index.html
 ├── vite.config.ts
 ├── tailwind.config.js
