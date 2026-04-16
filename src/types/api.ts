@@ -14,6 +14,7 @@ export interface SchemaHints {
   session_id?: string;
   conversation_history?: string;
   reply?: string;
+  caller_type?: string;
 }
 export interface Project {
   id: string;

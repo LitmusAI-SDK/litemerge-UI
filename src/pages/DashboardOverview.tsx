@@ -46,7 +46,12 @@ export default function DashboardOverview() {
   const [runsLoading, setRunsLoading] = useState(true);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setRuns([]);
+      setRunsLoading(false);
+      return;
+    }
+    setRunsLoading(true);
     listRuns(token)
       .then(setRuns)
       .catch(() => setRuns([]))
@@ -154,11 +159,19 @@ export default function DashboardOverview() {
                     return (
                       <tr
                         key={run.run_id}
+                        role="button"
+                        tabIndex={0}
                         className="group transition-colors cursor-pointer"
                         style={{ borderTop: "1px solid rgba(66,71,84,0.1)" }}
                         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#2d3449")}
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                         onClick={() => navigate(target)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            navigate(target);
+                          }
+                        }}
                       >
                         <td className="py-4 px-6 font-mono text-sm" style={{ color: "#adc6ff" }}>
                           #{run.run_id.slice(0, 8)}

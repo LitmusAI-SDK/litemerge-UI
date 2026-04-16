@@ -10,6 +10,8 @@ const STATUS_COLORS: Record<string, string> = {
 
 function TurnRow({ turn, defaultOpen = false }: { turn: ConversationTurn; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
+  const toggleId = `turn-toggle-${turn.turn_index}`;
+  const panelId = `turn-panel-${turn.turn_index}`;
 
   return (
     <div
@@ -17,7 +19,10 @@ function TurnRow({ turn, defaultOpen = false }: { turn: ConversationTurn; defaul
       style={{ border: "1px solid rgba(66,71,84,0.15)" }}
     >
       <button
+        id={toggleId}
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between px-4 py-2.5 transition-colors text-left"
         style={{ backgroundColor: open ? "rgba(45,52,73,0.5)" : "rgba(34,42,61,0.4)" }}
         onMouseEnter={(e) => { if (!open) e.currentTarget.style.backgroundColor = "rgba(45,52,73,0.3)"; }}
@@ -33,7 +38,7 @@ function TurnRow({ turn, defaultOpen = false }: { turn: ConversationTurn; defaul
       </button>
 
       {open && (
-        <div className="px-4 py-4 space-y-4" style={{ backgroundColor: "#0b1326" }}>
+        <div id={panelId} role="region" aria-labelledby={toggleId} className="px-4 py-4 space-y-4" style={{ backgroundColor: "#0b1326" }}>
           {/* Persona message */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "#424754" }}>
@@ -68,8 +73,9 @@ function TurnRow({ turn, defaultOpen = false }: { turn: ConversationTurn; defaul
 function SessionBlock({ session }: { session: SessionLog }) {
   const [open, setOpen] = useState(false);
   const statusColor = STATUS_COLORS[session.status] ?? "#94a3b8";
-
   const personaLabel = session.persona_name ?? session.persona_type ?? session.persona_id;
+  const toggleId = `session-toggle-${session.persona_id}`;
+  const panelId = `session-panel-${session.persona_id}`;
 
   return (
     <div
@@ -78,7 +84,10 @@ function SessionBlock({ session }: { session: SessionLog }) {
     >
       {/* Session header */}
       <button
+        id={toggleId}
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={panelId}
         className="w-full flex items-center gap-4 px-5 py-4 transition-colors text-left"
         style={{ backgroundColor: open ? "rgba(45,52,73,0.5)" : "transparent" }}
         onMouseEnter={(e) => { if (!open) e.currentTarget.style.backgroundColor = "rgba(45,52,73,0.25)"; }}
@@ -120,7 +129,7 @@ function SessionBlock({ session }: { session: SessionLog }) {
 
       {/* Turns list */}
       {open && (
-        <div className="px-5 pb-5 space-y-2" style={{ borderTop: "1px solid rgba(66,71,84,0.15)" }}>
+        <div id={panelId} role="region" aria-labelledby={toggleId} className="px-5 pb-5 space-y-2" style={{ borderTop: "1px solid rgba(66,71,84,0.15)" }}>
           {session.turns.length === 0 ? (
             <p className="text-sm py-4 text-center" style={{ color: "#424754" }}>No turns recorded.</p>
           ) : (

@@ -50,6 +50,7 @@ export default function ReportView() {
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!runId || !token) return;
@@ -61,9 +62,10 @@ export default function ReportView() {
       .finally(() => setLoading(false));
 
     setSessionsLoading(true);
+    setSessionsError(null);
     getRunSessions(runId, token)
-      .then(setSessions)
-      .catch(() => setSessions([]))
+      .then((data) => { setSessions(data); })
+      .catch(() => { setSessions([]); setSessionsError("Failed to load conversation logs."); })
       .finally(() => setSessionsLoading(false));
   }, [runId, token]);
 
@@ -203,8 +205,12 @@ export default function ReportView() {
         className="rounded-lg p-8"
         style={{ backgroundColor: "#131b2e" }}
       >
-        <SectionTitle>Conversation Logs ({sessions.length} session{sessions.length !== 1 ? "s" : ""})</SectionTitle>
-        <ConversationLogs sessions={sessions} loading={sessionsLoading} />
+        <SectionTitle>Conversation Logs ({sessionsError ? "—" : `${sessions.length} session${sessions.length !== 1 ? "s" : ""}`})</SectionTitle>
+        {sessionsError ? (
+          <p className="font-body text-sm" style={{ color: "#ffb4ab" }}>{sessionsError}</p>
+        ) : (
+          <ConversationLogs sessions={sessions} loading={sessionsLoading} />
+        )}
       </div>
     </div>
   );

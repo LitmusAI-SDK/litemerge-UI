@@ -21,9 +21,15 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
   );
   const [authValue, setAuthValue] = useState("");
   const [headerName, setHeaderName] = useState(editProject?.auth_config.header_name ?? "X-Api-Key");
-  const [schemaOpen, setSchemaOpen] = useState(false);
+  const [schemaOpen, setSchemaOpen] = useState(
+    (editProject?.schema_hints?.caller_type === "directline") ||
+    !!(editProject?.schema_hints?.message || editProject?.schema_hints?.reply)
+  );
   const [schemaMessage, setSchemaMessage] = useState(editProject?.schema_hints?.message ?? "");
   const [schemaReply, setSchemaReply] = useState(editProject?.schema_hints?.reply ?? "");
+  const [callerType, setCallerType] = useState<"standard" | "directline">(
+    (editProject?.schema_hints?.caller_type as "directline" | undefined) === "directline" ? "directline" : "standard"
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +49,7 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
       const schema_hints: Record<string, string> = {};
       if (schemaMessage) schema_hints.message = schemaMessage;
       if (schemaReply) schema_hints.reply = schemaReply;
+      if (callerType === "directline") schema_hints.caller_type = "directline";
 
       const payload = {
         name,
@@ -237,34 +244,76 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
 
               {schemaOpen && (
                 <div className="mt-4 space-y-4 px-1">
+                  {/* Caller Protocol */}
                   <div className="space-y-2">
                     <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>
-                      MESSAGE_FIELD_NAME
+                      CALLER_PROTOCOL
                     </label>
-                    <input
-                      type="text"
-                      value={schemaMessage}
-                      onChange={(e) => setSchemaMessage(e.target.value)}
-                      placeholder="input_text"
-                      className="w-full p-3 rounded-lg font-mono text-sm transition-all"
+                    <select
+                      value={callerType}
+                      onChange={(e) => {
+                        const v = e.target.value as "standard" | "directline";
+                        setCallerType(v);
+                        if (v === "directline") setAuthType("bearer");
+                      }}
+                      className="w-full p-3 rounded-lg font-mono text-sm transition-all appearance-none cursor-pointer"
                       style={inputStyle}
                       {...focusHandlers}
-                    />
+                    >
+                      <option value="standard">Standard HTTP (default)</option>
+                      <option value="directline">Microsoft DirectLine v3</option>
+                    </select>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>
-                      REPLY_FIELD_NAME
-                    </label>
-                    <input
-                      type="text"
-                      value={schemaReply}
-                      onChange={(e) => setSchemaReply(e.target.value)}
-                      placeholder="response.output"
-                      className="w-full p-3 rounded-lg font-mono text-sm transition-all"
-                      style={inputStyle}
-                      {...focusHandlers}
-                    />
-                  </div>
+
+                  {/* DirectLine info banner */}
+                  {callerType === "directline" && (
+                    <div
+                      className="flex gap-3 p-3 rounded-lg text-xs"
+                      style={{ backgroundColor: "rgba(173,198,255,0.06)", border: "1px solid rgba(173,198,255,0.15)", color: "#8c909f" }}
+                    >
+                      <span className="material-symbols-outlined text-base shrink-0" style={{ color: "#adc6ff" }}>info</span>
+                      <span>
+                        Set <span className="font-mono" style={{ color: "#dae2fd" }}>Agent Endpoint</span> to the DirectLine base URL
+                        (e.g. <span className="font-mono" style={{ color: "#dae2fd" }}>https://directline.botframework.com</span>).
+                        Use <span className="font-mono" style={{ color: "#dae2fd" }}>Bearer Token</span> auth with your channel secret.
+                        The two-step POST activity + poll GET activities protocol is handled automatically.
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Standard-only fields */}
+                  {callerType === "standard" && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>
+                          MESSAGE_FIELD_NAME
+                        </label>
+                        <input
+                          type="text"
+                          value={schemaMessage}
+                          onChange={(e) => setSchemaMessage(e.target.value)}
+                          placeholder="input_text"
+                          className="w-full p-3 rounded-lg font-mono text-sm transition-all"
+                          style={inputStyle}
+                          {...focusHandlers}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>
+                          REPLY_FIELD_NAME
+                        </label>
+                        <input
+                          type="text"
+                          value={schemaReply}
+                          onChange={(e) => setSchemaReply(e.target.value)}
+                          placeholder="response.output"
+                          className="w-full p-3 rounded-lg font-mono text-sm transition-all"
+                          style={inputStyle}
+                          {...focusHandlers}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

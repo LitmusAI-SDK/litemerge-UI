@@ -21,7 +21,14 @@ export default function ProjectCard({ project, onRunSimulation, onEdit }: Projec
   useEffect(() => {
     if (!token) return;
     listRuns(token, project.id)
-      .then((runs) => setRecentRuns(runs.slice(0, 3)))
+      .then((runs) => {
+        const sorted = [...runs].sort((a, b) => {
+          const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return (isNaN(bTime) ? 0 : bTime) - (isNaN(aTime) ? 0 : aTime);
+        });
+        setRecentRuns(sorted.slice(0, 3));
+      })
       .catch(() => setRecentRuns([]));
   }, [token, project.id]);
 
@@ -32,7 +39,12 @@ export default function ProjectCard({ project, onRunSimulation, onEdit }: Projec
     >
       {/* Header row */}
       <div className="flex justify-between items-start gap-3">
-        <div className="min-w-0 cursor-pointer" onClick={() => onEdit(project)}>
+        <button
+          type="button"
+          className="min-w-0 text-left"
+          onClick={() => onEdit(project)}
+          aria-label={`Edit ${project.name}`}
+        >
           <h3
             className="font-space-grotesk text-lg font-bold transition-colors group-hover:text-primary truncate"
             style={{ color: "#dae2fd" }}
@@ -42,7 +54,7 @@ export default function ProjectCard({ project, onRunSimulation, onEdit }: Projec
           <p className="text-xs font-mono mt-1 truncate max-w-[200px]" style={{ color: "#64748b" }}>
             {project.agent_endpoint}
           </p>
-        </div>
+        </button>
         {/* Auth type chip */}
         <span
           className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded font-mono"

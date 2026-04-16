@@ -31,6 +31,7 @@ function useOutsideClick(ref: React.RefObject<HTMLElement | null>, handler: () =
 
 function ApiKeyModal({ token, onClose }: { token: string | null; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useOutsideClick(ref, onClose);
 
@@ -42,6 +43,8 @@ function ApiKeyModal({ token, onClose }: { token: string | null; onClose: () => 
     });
   }
 
+  const masked = token ? "•".repeat(Math.min(token.length, 40)) : "—";
+
   return (
     <div
       ref={ref}
@@ -50,22 +53,38 @@ function ApiKeyModal({ token, onClose }: { token: string | null; onClose: () => 
     >
       <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#64748b" }}>Session Token</p>
       <div
-        className="font-mono text-xs rounded-lg px-3 py-2.5 mb-3 break-all select-all"
-        style={{ backgroundColor: "#0b1326", color: "#adc6ff", border: "1px solid rgba(66,71,84,0.2)" }}
+        className="font-mono text-xs rounded-lg px-3 py-2.5 mb-2 break-all"
+        style={{ backgroundColor: "#0b1326", color: "#adc6ff", border: "1px solid rgba(66,71,84,0.2)", userSelect: revealed ? "all" : "none" }}
+        aria-label="Session token value"
       >
-        {token ?? "—"}
+        {revealed ? (token ?? "—") : masked}
       </div>
-      <button
-        onClick={copy}
-        className="w-full py-2 rounded-lg text-sm font-bold transition-all"
-        style={{
-          background: copied ? "rgba(78,222,163,0.15)" : "rgba(173,198,255,0.1)",
-          color: copied ? "#4edea3" : "#adc6ff",
-          border: `1px solid ${copied ? "rgba(78,222,163,0.3)" : "rgba(173,198,255,0.2)"}`,
-        }}
-      >
-        {copied ? "Copied!" : "Copy Token"}
-      </button>
+      <div className="flex gap-2 mb-3">
+        <button
+          onClick={() => setRevealed((v) => !v)}
+          aria-label={revealed ? "Hide session token" : "Reveal session token"}
+          className="flex-1 py-2 rounded-lg text-sm font-bold transition-all"
+          style={{
+            background: "rgba(45,52,73,0.6)",
+            color: "#94a3b8",
+            border: "1px solid rgba(66,71,84,0.2)",
+          }}
+        >
+          {revealed ? "Hide" : "Show"}
+        </button>
+        <button
+          onClick={copy}
+          aria-label="Copy session token to clipboard"
+          className="flex-1 py-2 rounded-lg text-sm font-bold transition-all"
+          style={{
+            background: copied ? "rgba(78,222,163,0.15)" : "rgba(173,198,255,0.1)",
+            color: copied ? "#4edea3" : "#adc6ff",
+            border: `1px solid ${copied ? "rgba(78,222,163,0.3)" : "rgba(173,198,255,0.2)"}`,
+          }}
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -170,6 +189,9 @@ export default function TopBar() {
               className="rounded-lg p-2 transition-all duration-300 hover:bg-[#2d3449]"
               style={{ color: showApiKey ? "#adc6ff" : "#94a3b8" }}
               title="View session token"
+              aria-label="View session token"
+              aria-haspopup="true"
+              aria-expanded={showApiKey}
             >
               <span className="material-symbols-outlined">key</span>
             </button>
@@ -183,12 +205,11 @@ export default function TopBar() {
               className="rounded-lg p-2 transition-all duration-300 relative hover:bg-[#2d3449]"
               style={{ color: showNotifications ? "#adc6ff" : "#94a3b8" }}
               title="Notifications"
+              aria-label="Notifications"
+              aria-haspopup="true"
+              aria-expanded={showNotifications}
             >
               <span className="material-symbols-outlined">notifications</span>
-              <span
-                className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                style={{ backgroundColor: "#ffb4ab" }}
-              />
             </button>
             {showNotifications && <NotificationsPanel onClose={() => setShowNotifications(false)} />}
           </div>
@@ -201,6 +222,9 @@ export default function TopBar() {
             className="h-8 w-8 rounded-full overflow-hidden transition-all hover:ring-2 hover:ring-[#adc6ff]"
             style={{ border: "1px solid rgba(66,71,84,0.2)" }}
             title="Account"
+            aria-label="Account menu"
+            aria-haspopup="true"
+            aria-expanded={showUserMenu}
           >
             <div
               className="w-full h-full flex items-center justify-center text-sm font-bold font-space-grotesk"
