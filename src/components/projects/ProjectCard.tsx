@@ -89,10 +89,7 @@ export default function ProjectCard({ project, onRunSimulation, onEdit }: Projec
               <button
                 key={run.run_id}
                 onClick={() => navigate(run.status === "complete" ? `/runs/${run.run_id}/report` : `/runs/${run.run_id}`)}
-                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors text-left"
-                style={{ backgroundColor: "rgba(45,52,73,0.4)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(45,52,73,0.8)")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(45,52,73,0.4)")}
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-colors text-left bg-[rgba(45,52,73,0.4)] hover:bg-[rgba(45,52,73,0.8)]"
               >
                 <span className="font-mono text-xs" style={{ color: "#adc6ff" }}>
                   #{run.run_id.slice(0, 8)}

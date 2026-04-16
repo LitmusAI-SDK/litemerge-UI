@@ -28,7 +28,10 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
   const [schemaMessage, setSchemaMessage] = useState(editProject?.schema_hints?.message ?? "");
   const [schemaReply, setSchemaReply] = useState(editProject?.schema_hints?.reply ?? "");
   const [callerType, setCallerType] = useState<"standard" | "directline">(
-    (editProject?.schema_hints?.caller_type as "directline" | undefined) === "directline" ? "directline" : "standard"
+    editProject?.schema_hints?.caller_type === "directline" ? "directline" : "standard"
+  );
+  const [previousAuthType, setPreviousAuthType] = useState<"bearer" | "apikey" | "basic" | "none">(
+    editProject?.auth_config.type ?? "none"
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -254,7 +257,12 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                       onChange={(e) => {
                         const v = e.target.value as "standard" | "directline";
                         setCallerType(v);
-                        if (v === "directline") setAuthType("bearer");
+                        if (v === "directline") {
+                          setPreviousAuthType(authType);
+                          setAuthType("bearer");
+                        } else {
+                          setAuthType(previousAuthType);
+                        }
                       }}
                       className="w-full p-3 rounded-lg font-mono text-sm transition-all appearance-none cursor-pointer"
                       style={inputStyle}

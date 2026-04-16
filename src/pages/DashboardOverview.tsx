@@ -214,9 +214,9 @@ export default function DashboardOverview() {
                           <RunStatusBadge status={run.status} />
                         </td>
                         <td className="py-4 px-6 text-sm" style={{ color: "#94a3b8" }}>
-                          {new Date(run.created_at ?? Date.now()).toLocaleString(undefined, {
-                            month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                          })}
+                          {run.created_at
+                            ? new Date(run.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                            : "—"}
                         </td>
                         <td className="py-4 px-6 text-right">
                           <span className="material-symbols-outlined" style={{ color: "#475569" }}>

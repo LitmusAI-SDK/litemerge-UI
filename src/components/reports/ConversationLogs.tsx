@@ -8,10 +8,10 @@ const STATUS_COLORS: Record<string, string> = {
   in_progress: "#adc6ff",
 };
 
-function TurnRow({ turn, defaultOpen = false }: { turn: ConversationTurn; defaultOpen?: boolean }) {
+function TurnRow({ turn, sessionId, defaultOpen = false }: { turn: ConversationTurn; sessionId: string; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
-  const toggleId = `turn-toggle-${turn.turn_index}`;
-  const panelId = `turn-panel-${turn.turn_index}`;
+  const toggleId = `turn-toggle-${sessionId}-${turn.turn_index}`;
+  const panelId = `turn-panel-${sessionId}-${turn.turn_index}`;
 
   return (
     <div
@@ -135,7 +135,7 @@ function SessionBlock({ session }: { session: SessionLog }) {
           ) : (
             <div className="pt-4 space-y-2">
               {session.turns.map((turn) => (
-                <TurnRow key={turn.turn_index} turn={turn} />
+                <TurnRow key={turn.turn_index} turn={turn} sessionId={session.persona_id} />
               ))}
             </div>
           )}
