@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AppShell from "./components/layout/AppShell";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import DashboardOverview from "./pages/DashboardOverview";
+import ProjectsPage from "./pages/ProjectsPage";
+import HistoryPage from "./pages/HistoryPage";
 import RunView from "./pages/RunView";
 import ReportView from "./pages/ReportView";
 
@@ -23,7 +25,9 @@ function AppRoutes() {
           </PrivateRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardOverview />} />
+        <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/history" element={<HistoryPage />} />
         <Route path="/runs/:runId" element={<RunView />} />
         <Route path="/runs/:runId/report" element={<ReportView />} />
       </Route>

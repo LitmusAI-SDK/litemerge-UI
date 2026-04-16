@@ -17,7 +17,7 @@ export default function Login() {
     setError(null);
     setLoading(true);
     try {
-      const token = await apiLogin(email, apiKey);
+      const token = await apiLogin(apiKey);
       login(token);
       navigate("/dashboard", { replace: true });
     } catch (err) {

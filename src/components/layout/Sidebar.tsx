@@ -1,8 +1,38 @@
-import { NavLink } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+
+interface NavItemProps {
+  icon: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}
+
+function NavItem({ icon, label, active, onClick }: NavItemProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 w-full rounded-lg font-medium transition-colors duration-200 text-sm text-left ${
+        active ? "font-bold border-r-2" : "hover:bg-[#2d3449]"
+      }`}
+      style={
+        active
+          ? { color: "#adc6ff", borderColor: "#adc6ff", backgroundColor: "rgba(45,52,73,0.5)" }
+          : { color: "#94a3b8" }
+      }
+    >
+      <span className="material-symbols-outlined">{icon}</span>
+      <span>{label}</span>
+    </button>
+  );
+}
 
 export default function Sidebar() {
   const { logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const path = location.pathname;
 
   return (
     <aside className="h-screen w-64 fixed left-0 top-0 flex flex-col py-8 px-4 z-50"
@@ -27,52 +57,24 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav className="flex-1 space-y-1">
-        <NavLink to="/dashboard"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-sm ${
-              isActive
-                ? "font-bold border-r-2"
-                : "hover:bg-[#2d3449]"
-            }`
-          }
-          style={({ isActive }) => isActive
-            ? { color: "#adc6ff", borderColor: "#adc6ff", backgroundColor: "rgba(45,52,73,0.5)" }
-            : { color: "#94a3b8" }
-          }
-        >
-          <span className="material-symbols-outlined">dashboard</span>
-          <span>Dashboard</span>
-        </NavLink>
-
-        <NavLink to="/dashboard?tab=projects"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-sm ${
-              isActive ? "font-bold border-r-2" : "hover:bg-[#2d3449]"
-            }`
-          }
-          style={({ isActive }) => isActive
-            ? { color: "#adc6ff", borderColor: "#adc6ff", backgroundColor: "rgba(45,52,73,0.5)" }
-            : { color: "#94a3b8" }
-          }
-        >
-          <span className="material-symbols-outlined">folder_shared</span>
-          <span>Projects</span>
-        </NavLink>
-
-        <NavLink to="/dashboard?tab=history"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors duration-200 text-sm ${
-              isActive ? "font-bold border-r-2" : "hover:bg-[#2d3449]"
-            }`
-          }
-          style={({ isActive }) => isActive
-            ? { color: "#adc6ff", borderColor: "#adc6ff", backgroundColor: "rgba(45,52,73,0.5)" }
-            : { color: "#94a3b8" }
-          }
-        >
-          <span className="material-symbols-outlined">history</span>
-          <span>Run History</span>
-        </NavLink>
+        <NavItem
+          icon="dashboard"
+          label="Dashboard"
+          active={path === "/dashboard"}
+          onClick={() => navigate("/dashboard")}
+        />
+        <NavItem
+          icon="folder_shared"
+          label="Projects"
+          active={path === "/projects"}
+          onClick={() => navigate("/projects")}
+        />
+        <NavItem
+          icon="history"
+          label="Run History"
+          active={path === "/history"}
+          onClick={() => navigate("/history")}
+        />
       </nav>
 
       {/* Sign out */}
