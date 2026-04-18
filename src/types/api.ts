@@ -15,6 +15,7 @@ export interface SchemaHints {
   conversation_history?: string;
   reply?: string;
   caller_type?: "standard" | "directline";
+  directline_conversation_id?: string;
 }
 export interface Project {
   id: string;

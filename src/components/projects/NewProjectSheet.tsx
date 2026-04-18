@@ -30,6 +30,9 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
   const [callerType, setCallerType] = useState<"standard" | "directline">(
     editProject?.schema_hints?.caller_type === "directline" ? "directline" : "standard"
   );
+  const [dlConversationId, setDlConversationId] = useState(
+    editProject?.schema_hints?.directline_conversation_id ?? ""
+  );
   const [previousAuthType, setPreviousAuthType] = useState<"bearer" | "apikey" | "basic" | "none">(
     editProject?.auth_config.type ?? "none"
   );
@@ -52,7 +55,10 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
       const schema_hints: Record<string, string> = {};
       if (schemaMessage) schema_hints.message = schemaMessage;
       if (schemaReply) schema_hints.reply = schemaReply;
-      if (callerType === "directline") schema_hints.caller_type = "directline";
+      if (callerType === "directline") {
+        schema_hints.caller_type = "directline";
+        if (dlConversationId) schema_hints.directline_conversation_id = dlConversationId;
+      }
 
       const payload = {
         name,
@@ -273,20 +279,39 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                     </select>
                   </div>
 
-                  {/* DirectLine info banner */}
+                  {/* DirectLine fields */}
                   {callerType === "directline" && (
-                    <div
-                      className="flex gap-3 p-3 rounded-lg text-xs"
-                      style={{ backgroundColor: "rgba(173,198,255,0.06)", border: "1px solid rgba(173,198,255,0.15)", color: "#8c909f" }}
-                    >
-                      <span className="material-symbols-outlined text-base shrink-0" style={{ color: "#adc6ff" }}>info</span>
-                      <span>
-                        Set <span className="font-mono" style={{ color: "#dae2fd" }}>Agent Endpoint</span> to the DirectLine base URL
-                        (e.g. <span className="font-mono" style={{ color: "#dae2fd" }}>https://directline.botframework.com</span>).
-                        Use <span className="font-mono" style={{ color: "#dae2fd" }}>Bearer Token</span> auth with your channel secret.
-                        The two-step POST activity + poll GET activities protocol is handled automatically.
-                      </span>
-                    </div>
+                    <>
+                      <div
+                        className="flex gap-3 p-3 rounded-lg text-xs"
+                        style={{ backgroundColor: "rgba(173,198,255,0.06)", border: "1px solid rgba(173,198,255,0.15)", color: "#8c909f" }}
+                      >
+                        <span className="material-symbols-outlined text-base shrink-0" style={{ color: "#adc6ff" }}>info</span>
+                        <span>
+                          Set <span className="font-mono" style={{ color: "#dae2fd" }}>Agent Endpoint</span> to
+                          {" "}<span className="font-mono" style={{ color: "#dae2fd" }}>https://directline.botframework.com</span>.
+                          <br /><br />
+                          <span style={{ color: "#dae2fd" }}>Mode A — channel secret:</span> leave Conversation ID blank. Use Bearer Token auth with your long-lived channel secret.
+                          <br /><br />
+                          <span style={{ color: "#dae2fd" }}>Mode B — captured token (e.g. Air India):</span> paste the <span className="font-mono">conversationId</span> and the short-lived Bearer token from the widget's network requests. Token expires in ~1h; re-capture when it does.
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>
+                          DIRECTLINE_CONVERSATION_ID <span style={{ color: "#4a5568" }}>(optional — Mode B only)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={dlConversationId}
+                          onChange={(e) => setDlConversationId(e.target.value)}
+                          placeholder="8Eit97xYyej8cVpb0bCUpU-in"
+                          className="w-full p-3 rounded-lg font-mono text-sm transition-all"
+                          style={inputStyle}
+                          {...focusHandlers}
+                        />
+                      </div>
+                    </>
                   )}
 
                   {/* Standard-only fields */}
