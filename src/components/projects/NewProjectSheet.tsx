@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { createProject, patchProject } from "../../lib/api/projects";
 import type { Project } from "../../types/api";
@@ -21,6 +21,10 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
   );
   const [authValue, setAuthValue] = useState("");
   const [headerName, setHeaderName] = useState(editProject?.auth_config.header_name ?? "X-Api-Key");
+  const [companyContext, setCompanyContext] = useState(editProject?.company_context ?? "");
+  const [maxMessageChars, setMaxMessageChars] = useState<string>(
+    editProject?.max_message_chars != null ? String(editProject.max_message_chars) : ""
+  );
   const [schemaOpen, setSchemaOpen] = useState(
     (editProject?.schema_hints?.caller_type === "directline") ||
     !!(editProject?.schema_hints?.message || editProject?.schema_hints?.reply)
@@ -38,6 +42,27 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    setName(editProject?.name ?? "");
+    setEndpoint(editProject?.agent_endpoint ?? "");
+    setAuthType(editProject?.auth_config?.type ?? "none");
+    setAuthValue("");
+    setHeaderName(editProject?.auth_config?.header_name ?? "X-Api-Key");
+    setCompanyContext(editProject?.company_context ?? "");
+    setMaxMessageChars(editProject?.max_message_chars != null ? String(editProject.max_message_chars) : "");
+    setSchemaOpen(
+      editProject?.schema_hints?.caller_type === "directline" ||
+      !!(editProject?.schema_hints?.message || editProject?.schema_hints?.reply)
+    );
+    setSchemaMessage(editProject?.schema_hints?.message ?? "");
+    setSchemaReply(editProject?.schema_hints?.reply ?? "");
+    setCallerType(editProject?.schema_hints?.caller_type === "directline" ? "directline" : "standard");
+    setDlConversationId(editProject?.schema_hints?.directline_conversation_id ?? "");
+    setPreviousAuthType(editProject?.auth_config?.type ?? "none");
+    setError(null);
+  }, [open, editProject]);
 
   if (!open) return null;
 
@@ -66,6 +91,8 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
         owner_id: "dashboard",
         auth_config: auth_config as Parameters<typeof createProject>[0]["auth_config"],
         ...(Object.keys(schema_hints).length ? { schema_hints } : {}),
+        ...(companyContext.trim() ? { company_context: companyContext.trim() } : {}),
+        ...(maxMessageChars ? { max_message_chars: parseInt(maxMessageChars, 10) } : {}),
       };
 
       if (isEdit && editProject) {
@@ -166,6 +193,51 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                   placeholder="https://api.agent-cloud.io/v1/inference"
                   required
                   className="w-full px-4 py-4 rounded-lg font-mono text-sm transition-all"
+                  style={inputStyle}
+                  {...focusHandlers}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold tracking-widest uppercase" style={{ color: "#adc6ff" }}>
+                  Company & Agent Context
+                </label>
+                <p className="text-xs" style={{ color: "#8c909f" }}>
+                  Describe the company and what the agent does. Personas will tailor their
+                  scenarios to this context.
+                </p>
+                <textarea
+                  value={companyContext}
+                  onChange={(e) => setCompanyContext(e.target.value)}
+                  placeholder={`e.g. Air India is India's national flag carrier. The agent handles flight booking, cancellations, baggage queries, Flying Returns loyalty programme questions, and check-in assistance.`}
+                  rows={4}
+                  maxLength={2000}
+                  className="w-full p-4 rounded-lg text-sm transition-all resize-none"
+                  style={{ ...inputStyle, lineHeight: "1.6" }}
+                  onFocus={(e) => { e.target.style.borderColor = "#adc6ff"; e.target.style.boxShadow = "0 0 0 1px #adc6ff"; }}
+                  onBlur={(e) => { e.target.style.borderColor = "rgba(66,71,84,0.2)"; e.target.style.boxShadow = "none"; }}
+                />
+                <p className="text-xs text-right" style={{ color: "#4a5568" }}>
+                  {companyContext.length} / 2000
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold tracking-widest uppercase" style={{ color: "#adc6ff" }}>
+                  Message Character Limit
+                </label>
+                <p className="text-xs" style={{ color: "#8c909f" }}>
+                  Max characters per persona message. Set this to your agent's input cap
+                  (e.g. 500). Leave blank for no limit.
+                </p>
+                <input
+                  type="number"
+                  value={maxMessageChars}
+                  onChange={(e) => setMaxMessageChars(e.target.value)}
+                  placeholder="500"
+                  min={50}
+                  max={10000}
+                  className="w-full p-4 rounded-lg font-mono text-sm transition-all"
                   style={inputStyle}
                   {...focusHandlers}
                 />

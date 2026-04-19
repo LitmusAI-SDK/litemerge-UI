@@ -6,6 +6,8 @@ export interface CreateRunPayload {
   test_suite: TestSuite;
   fail_threshold: number;
   notify_webhook?: string;
+  persona_ids?: string[];
+  turns_per_session?: number;
 }
 
 export interface RunCreateResponse {

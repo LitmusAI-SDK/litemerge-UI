@@ -24,6 +24,8 @@ export interface Project {
   auth_config: AuthConfigPublic;
   owner_id: string;
   schema_hints?: SchemaHints | null;
+  company_context?: string | null;
+  max_message_chars?: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -11,6 +11,8 @@ export interface CreateProjectPayload {
     header_name?: string;
   };
   schema_hints?: Record<string, string>;
+  company_context?: string;
+  max_message_chars?: number;
 }
 
 export function getProjects(token: string): Promise<{ items: Project[] }> {
