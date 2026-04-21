@@ -11,9 +11,10 @@ interface ProjectCardProps {
   project: Project;
   onRunSimulation: (project: Project) => void;
   onEdit: (project: Project) => void;
+  onDelete: (project: Project) => void;
 }
 
-export default function ProjectCard({ project, onRunSimulation, onEdit }: ProjectCardProps) {
+export default function ProjectCard({ project, onRunSimulation, onEdit, onDelete }: ProjectCardProps) {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [recentRuns, setRecentRuns] = useState<Run[]>([]);
@@ -55,17 +56,30 @@ export default function ProjectCard({ project, onRunSimulation, onEdit }: Projec
             {project.agent_endpoint}
           </p>
         </button>
-        {/* Auth type chip */}
-        <span
-          className="shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded font-mono"
-          style={{
-            backgroundColor: "rgba(45,52,73,0.8)",
-            color: "#c2c6d6",
-            border: "1px solid rgba(66,71,84,0.2)",
-          }}
-        >
-          {project.auth_config.type}
-        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Auth type chip */}
+          <span
+            className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded font-mono"
+            style={{
+              backgroundColor: "rgba(45,52,73,0.8)",
+              color: "#c2c6d6",
+              border: "1px solid rgba(66,71,84,0.2)",
+            }}
+          >
+            {project.auth_config.type}
+          </span>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onDelete(project); }}
+            aria-label={`Delete ${project.name}`}
+            className="p-1 rounded transition-colors"
+            style={{ color: "#64748b" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#ffb4ab"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#64748b"; }}
+          >
+            <span className="material-symbols-outlined text-base">delete</span>
+          </button>
+        </div>
       </div>
 
       {/* Preflight row */}

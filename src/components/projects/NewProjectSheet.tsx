@@ -26,17 +26,23 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
     editProject?.max_message_chars != null ? String(editProject.max_message_chars) : ""
   );
   const [schemaOpen, setSchemaOpen] = useState(
-    (editProject?.schema_hints?.caller_type === "directline") ||
+    (editProject?.schema_hints?.caller_type === "directline" || editProject?.schema_hints?.caller_type === "tmobile") ||
     !!(editProject?.schema_hints?.message || editProject?.schema_hints?.reply)
   );
   const [schemaMessage, setSchemaMessage] = useState(editProject?.schema_hints?.message ?? "");
   const [schemaReply, setSchemaReply] = useState(editProject?.schema_hints?.reply ?? "");
-  const [callerType, setCallerType] = useState<"standard" | "directline">(
-    editProject?.schema_hints?.caller_type === "directline" ? "directline" : "standard"
+  const [callerType, setCallerType] = useState<"standard" | "directline" | "tmobile">(
+    (editProject?.schema_hints?.caller_type as "standard" | "directline" | "tmobile") ?? "standard"
   );
   const [dlConversationId, setDlConversationId] = useState(
     editProject?.schema_hints?.directline_conversation_id ?? ""
   );
+  const [tmConversationId, setTmConversationId] = useState(editProject?.schema_hints?.tmobile_conversation_id ?? "");
+  const [tmSessionId, setTmSessionId] = useState(editProject?.schema_hints?.tmobile_session_id ?? "");
+  const [tmInteractionId, setTmInteractionId] = useState(editProject?.schema_hints?.tmobile_interaction_id ?? "");
+  const [tmWorkflowId, setTmWorkflowId] = useState(editProject?.schema_hints?.tmobile_workflow_id ?? "UPGRADE");
+  const [tmSubWorkflowId, setTmSubWorkflowId] = useState(editProject?.schema_hints?.tmobile_sub_workflow_id ?? "Contact Us");
+  const [tmXAuthOriginator, setTmXAuthOriginator] = useState(editProject?.schema_hints?.tmobile_x_auth_originator ?? "");
   const [previousAuthType, setPreviousAuthType] = useState<"bearer" | "apikey" | "basic" | "none">(
     editProject?.auth_config.type ?? "none"
   );
@@ -53,13 +59,19 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
     setCompanyContext(editProject?.company_context ?? "");
     setMaxMessageChars(editProject?.max_message_chars != null ? String(editProject.max_message_chars) : "");
     setSchemaOpen(
-      editProject?.schema_hints?.caller_type === "directline" ||
+      (editProject?.schema_hints?.caller_type === "directline" || editProject?.schema_hints?.caller_type === "tmobile") ||
       !!(editProject?.schema_hints?.message || editProject?.schema_hints?.reply)
     );
     setSchemaMessage(editProject?.schema_hints?.message ?? "");
     setSchemaReply(editProject?.schema_hints?.reply ?? "");
-    setCallerType(editProject?.schema_hints?.caller_type === "directline" ? "directline" : "standard");
+    setCallerType((editProject?.schema_hints?.caller_type as "standard" | "directline" | "tmobile") ?? "standard");
     setDlConversationId(editProject?.schema_hints?.directline_conversation_id ?? "");
+    setTmConversationId(editProject?.schema_hints?.tmobile_conversation_id ?? "");
+    setTmSessionId(editProject?.schema_hints?.tmobile_session_id ?? "");
+    setTmInteractionId(editProject?.schema_hints?.tmobile_interaction_id ?? "");
+    setTmWorkflowId(editProject?.schema_hints?.tmobile_workflow_id ?? "UPGRADE");
+    setTmSubWorkflowId(editProject?.schema_hints?.tmobile_sub_workflow_id ?? "Contact Us");
+    setTmXAuthOriginator(editProject?.schema_hints?.tmobile_x_auth_originator ?? "");
     setPreviousAuthType(editProject?.auth_config?.type ?? "none");
     setError(null);
   }, [open, editProject]);
@@ -83,6 +95,14 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
       if (callerType === "directline") {
         schema_hints.caller_type = "directline";
         if (dlConversationId) schema_hints.directline_conversation_id = dlConversationId;
+      } else if (callerType === "tmobile") {
+        schema_hints.caller_type = "tmobile";
+        if (tmConversationId) schema_hints.tmobile_conversation_id = tmConversationId;
+        if (tmSessionId) schema_hints.tmobile_session_id = tmSessionId;
+        if (tmInteractionId) schema_hints.tmobile_interaction_id = tmInteractionId;
+        if (tmWorkflowId) schema_hints.tmobile_workflow_id = tmWorkflowId;
+        if (tmSubWorkflowId) schema_hints.tmobile_sub_workflow_id = tmSubWorkflowId;
+        if (tmXAuthOriginator) schema_hints.tmobile_x_auth_originator = tmXAuthOriginator;
       }
 
       const payload = {
@@ -333,9 +353,9 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                     <select
                       value={callerType}
                       onChange={(e) => {
-                        const v = e.target.value as "standard" | "directline";
+                        const v = e.target.value as "standard" | "directline" | "tmobile";
                         setCallerType(v);
-                        if (v === "directline") {
+                        if (v === "directline" || v === "tmobile") {
                           setPreviousAuthType(authType);
                           setAuthType("bearer");
                         } else {
@@ -348,6 +368,7 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                     >
                       <option value="standard">Standard HTTP (default)</option>
                       <option value="directline">Microsoft DirectLine v3</option>
+                      <option value="tmobile">T-Mobile InfoBot</option>
                     </select>
                   </div>
 
@@ -383,6 +404,42 @@ export default function NewProjectSheet({ open, onClose, onSaved, editProject }:
                           {...focusHandlers}
                         />
                       </div>
+                    </>
+                  )}
+
+                  {/* T-Mobile fields */}
+                  {callerType === "tmobile" && (
+                    <>
+                      <div
+                        className="flex gap-3 p-3 rounded-lg text-xs"
+                        style={{ backgroundColor: "rgba(173,198,255,0.06)", border: "1px solid rgba(173,198,255,0.15)", color: "#8c909f" }}
+                      >
+                        <span className="material-symbols-outlined text-base shrink-0" style={{ color: "#adc6ff" }}>info</span>
+                        <span>
+                          Capture these values from a real browser session on the T-Mobile chat page (DevTools → Network → copy as cURL). Tokens expire — re-capture when the bot stops responding.
+                        </span>
+                      </div>
+                      {[
+                        { label: "CONVERSATION_ID", value: tmConversationId, set: setTmConversationId, placeholder: "253e4eb2-9cbd-41aa-bc9c-..." },
+                        { label: "SESSION_ID", value: tmSessionId, set: setTmSessionId, placeholder: "18ae581a-0827-42f3-8440-..." },
+                        { label: "INTERACTION_ID", value: tmInteractionId, set: setTmInteractionId, placeholder: "097ebb03-fdde-454b-89bb-..." },
+                        { label: "WORKFLOW_ID", value: tmWorkflowId, set: setTmWorkflowId, placeholder: "UPGRADE" },
+                        { label: "SUB_WORKFLOW_ID", value: tmSubWorkflowId, set: setTmSubWorkflowId, placeholder: "Contact Us" },
+                        { label: "X_AUTH_ORIGINATOR (JWT)", value: tmXAuthOriginator, set: setTmXAuthOriginator, placeholder: "eyJraWQi..." },
+                      ].map(({ label, value, set, placeholder }) => (
+                        <div key={label} className="space-y-2">
+                          <label className="text-xs font-mono font-bold" style={{ color: "#64748b" }}>{label}</label>
+                          <input
+                            type={label.includes("JWT") || label.includes("AUTH") ? "password" : "text"}
+                            value={value}
+                            onChange={(e) => set(e.target.value)}
+                            placeholder={placeholder}
+                            className="w-full p-3 rounded-lg font-mono text-sm transition-all"
+                            style={inputStyle}
+                            {...focusHandlers}
+                          />
+                        </div>
+                      ))}
                     </>
                   )}
 

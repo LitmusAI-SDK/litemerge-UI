@@ -4,14 +4,20 @@ import { useProjects } from "../hooks/useProjects";
 import ProjectCard from "../components/projects/ProjectCard";
 import NewProjectSheet from "../components/projects/NewProjectSheet";
 import RunLaunchModal from "../components/runs/RunLaunchModal";
+import { deleteProject } from "../lib/api/projects";
+import { useAuth } from "../context/AuthContext";
 import type { Project } from "../types/api";
 
 export default function ProjectsPage() {
   const { projects, loading, error, refresh } = useProjects();
+  const { token } = useAuth();
   const navigate = useNavigate();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const [launchProject, setLaunchProject] = useState<Project | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function openNew() {
     setEditProject(null);
@@ -21,6 +27,32 @@ export default function ProjectsPage() {
   function openEdit(project: Project) {
     setEditProject(project);
     setSheetOpen(true);
+  }
+
+  function openDelete(project: Project) {
+    setDeleteTarget(project);
+    setDeleteError(null);
+  }
+
+  function closeDelete() {
+    if (deleting) return;
+    setDeleteTarget(null);
+    setDeleteError(null);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget || !token) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteProject(deleteTarget.id, token);
+      setDeleteTarget(null);
+      refresh();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete project.");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -90,6 +122,7 @@ export default function ProjectsPage() {
             project={project}
             onRunSimulation={setLaunchProject}
             onEdit={openEdit}
+            onDelete={openDelete}
           />
         ))}
       </div>
@@ -106,6 +139,52 @@ export default function ProjectsPage() {
           project={launchProject}
           onClose={() => setLaunchProject(null)}
         />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(6,14,32,0.7)", backdropFilter: "blur(4px)" }}
+          onClick={closeDelete}
+        >
+          <div
+            className="rounded-xl p-6 w-full max-w-sm flex flex-col gap-5"
+            style={{ backgroundColor: "#111827", border: "1px solid rgba(66,71,84,0.2)", boxShadow: "0 24px 48px rgba(0,0,0,0.6)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-2xl" style={{ color: "#ffb4ab" }}>warning</span>
+              <h3 className="font-space-grotesk font-bold text-lg" style={{ color: "#dae2fd" }}>Delete Project</h3>
+            </div>
+            <p className="text-sm" style={{ color: "#8c909f" }}>
+              Are you sure you want to delete{" "}
+              <span className="font-bold" style={{ color: "#dae2fd" }}>{deleteTarget.name}</span>?
+              This action cannot be undone.
+            </p>
+            {deleteError && (
+              <p className="text-sm" style={{ color: "#ffb4ab" }}>{deleteError}</p>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={closeDelete}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg text-sm font-bold transition-colors"
+                style={{ backgroundColor: "rgba(45,52,73,0.6)", color: "#c2c6d6" }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg text-sm font-bold transition-all active:scale-95"
+                style={{ backgroundColor: "#93000a", color: "#ffb4ab", opacity: deleting ? 0.6 : 1 }}
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

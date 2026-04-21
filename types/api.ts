@@ -14,6 +14,7 @@ export interface AuthConfigPublic {
 }
 
 export interface SchemaHints {
+  caller_type?: string;
   message?: string;
   session_id?: string;
   conversation_history?: string;

@@ -14,8 +14,14 @@ export interface SchemaHints {
   session_id?: string;
   conversation_history?: string;
   reply?: string;
-  caller_type?: "standard" | "directline";
+  caller_type?: "standard" | "directline" | "tmobile";
   directline_conversation_id?: string;
+  tmobile_conversation_id?: string;
+  tmobile_session_id?: string;
+  tmobile_interaction_id?: string;
+  tmobile_workflow_id?: string;
+  tmobile_sub_workflow_id?: string;
+  tmobile_x_auth_originator?: string;
 }
 export interface Project {
   id: string;

@@ -36,6 +36,8 @@ interface NewProjectFormProps {
 
 type AuthType = 'none' | 'bearer' | 'apikey' | 'basic';
 
+type CallerProtocol = 'standard' | 'directline' | 'tmobile';
+
 interface FormState {
   name: string;
   endpoint: string;
@@ -44,6 +46,7 @@ interface FormState {
   authHeader: string;
   authUsername: string;
   authPassword: string;
+  callerProtocol: CallerProtocol;
   schemaMessage: string;
   schemaReply: string;
   schemaSessionId: string;
@@ -58,6 +61,7 @@ const EMPTY_FORM: FormState = {
   authHeader: 'X-Api-Key',
   authUsername: '',
   authPassword: '',
+  callerProtocol: 'standard',
   schemaMessage: '',
   schemaReply: '',
   schemaSessionId: '',
@@ -102,12 +106,18 @@ export default function NewProjectForm({
 
   function getInitialForm(): FormState {
     if (!editProject) return EMPTY_FORM;
+    const callerType = editProject.schema_hints?.caller_type as CallerProtocol | undefined;
     return {
       ...EMPTY_FORM,
       name: editProject.name,
       endpoint: editProject.agent_endpoint,
       authType: editProject.auth_config.type as AuthType,
       authHeader: editProject.auth_config.header_name ?? 'X-Api-Key',
+      callerProtocol: callerType ?? 'standard',
+      schemaMessage: editProject.schema_hints?.message ?? '',
+      schemaReply: editProject.schema_hints?.reply ?? '',
+      schemaSessionId: editProject.schema_hints?.session_id ?? '',
+      schemaHistory: editProject.schema_hints?.conversation_history ?? '',
     };
   }
 
@@ -148,15 +158,21 @@ export default function NewProjectForm({
       authConfig.password = form.authPassword;
     }
 
-    const schemaHints =
-      form.schemaMessage || form.schemaReply || form.schemaSessionId || form.schemaHistory
-        ? {
-            message: form.schemaMessage || undefined,
-            reply: form.schemaReply || undefined,
-            session_id: form.schemaSessionId || undefined,
-            conversation_history: form.schemaHistory || undefined,
-          }
-        : null;
+    const hasSchemaFields =
+      form.callerProtocol !== 'standard' ||
+      form.schemaMessage ||
+      form.schemaReply ||
+      form.schemaSessionId ||
+      form.schemaHistory;
+    const schemaHints = hasSchemaFields
+      ? {
+          caller_type: form.callerProtocol !== 'standard' ? form.callerProtocol : undefined,
+          message: form.schemaMessage || undefined,
+          reply: form.schemaReply || undefined,
+          session_id: form.schemaSessionId || undefined,
+          conversation_history: form.schemaHistory || undefined,
+        }
+      : null;
 
     setLoading(true);
     try {
@@ -315,22 +331,42 @@ export default function NewProjectForm({
                 <p className="text-xs text-slate-500">
                   Map your agent&apos;s request/response field names if they differ from defaults.
                 </p>
-                {[
-                  { field: 'schemaMessage', label: 'Message field name', placeholder: 'message' },
-                  { field: 'schemaReply', label: 'Reply field name', placeholder: 'reply' },
-                  { field: 'schemaSessionId', label: 'Session ID field name', placeholder: 'session_id' },
-                  { field: 'schemaHistory', label: 'History field name', placeholder: 'conversation_history' },
-                ].map(({ field, label, placeholder }) => (
-                  <div key={field} className="space-y-1">
-                    <label className="text-xs text-slate-400">{label}</label>
-                    <Input
-                      value={form[field as keyof FormState]}
-                      onChange={(e) => update(field as keyof FormState, e.target.value)}
-                      placeholder={placeholder}
-                      className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 text-xs h-8"
-                    />
-                  </div>
-                ))}
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400 uppercase tracking-wide">Caller Protocol</label>
+                  <Select
+                    value={form.callerProtocol}
+                    onValueChange={(v) => v != null && update('callerProtocol', v)}
+                  >
+                    <SelectTrigger className="bg-slate-700 border-slate-600 text-white text-xs h-8">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                      <SelectItem value="standard">Standard HTTP (default)</SelectItem>
+                      <SelectItem value="directline">DirectLine (Bot Framework)</SelectItem>
+                      <SelectItem value="tmobile">T-Mobile InfoBot</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {form.callerProtocol === 'standard' && (
+                  <>
+                    {[
+                      { field: 'schemaMessage', label: 'Message field name', placeholder: 'message' },
+                      { field: 'schemaReply', label: 'Reply field name', placeholder: 'reply' },
+                      { field: 'schemaSessionId', label: 'Session ID field name', placeholder: 'session_id' },
+                      { field: 'schemaHistory', label: 'History field name', placeholder: 'conversation_history' },
+                    ].map(({ field, label, placeholder }) => (
+                      <div key={field} className="space-y-1">
+                        <label className="text-xs text-slate-400">{label}</label>
+                        <Input
+                          value={form[field as keyof FormState]}
+                          onChange={(e) => update(field as keyof FormState, e.target.value)}
+                          placeholder={placeholder}
+                          className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 text-xs h-8"
+                        />
+                      </div>
+                    ))}
+                  </>
+                )}
               </AccordionContent>
             </AccordionItem>
           </Accordion>
