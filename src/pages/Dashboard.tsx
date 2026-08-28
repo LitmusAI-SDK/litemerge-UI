@@ -199,6 +199,7 @@ export default function Dashboard() {
 
       {/* New / Edit project sheet */}
       <NewProjectSheet
+        key={editProject?.id ?? "new"}
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         onSaved={refresh}

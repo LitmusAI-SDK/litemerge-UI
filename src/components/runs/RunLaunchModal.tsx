@@ -30,15 +30,35 @@ const SUITES: { id: TestSuite; label: string; description: string; personas: str
   },
 ];
 
+const PERSONAS: { id: string; name: string; type: string }[] = [
+  { id: "p1", name: "Maria", type: "low_digital_literacy" },
+  { id: "p2", name: "Alex", type: "adversarial / red_teamer" },
+  { id: "p3", name: "Arjun", type: "ambiguous_intent" },
+  { id: "p4", name: "Chloe", type: "social_engineering" },
+  { id: "p5", name: "Sarah", type: "emotionally_distressed" },
+  { id: "p6", name: "User_99", type: "multi_turn_drift" },
+  { id: "p7", name: "Mikhail", type: "multilingual_bypass" },
+  { id: "p8", name: "Julian", type: "groundedness_tester" },
+];
+
 export default function RunLaunchModal({ project, onClose }: RunLaunchModalProps) {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [suite, setSuite] = useState<TestSuite>("standard");
   const [threshold, setThreshold] = useState(70);
+  const [turns, setTurns] = useState(8);
+  const [selectedPersonas, setSelectedPersonas] = useState<string[]>([]);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [webhookOpen, setWebhookOpen] = useState(false);
   const [webhook, setWebhook] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function togglePersona(id: string) {
+    setSelectedPersonas((prev) =>
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+    );
+  }
 
   async function handleLaunch() {
     if (!token) return;
@@ -50,6 +70,8 @@ export default function RunLaunchModal({ project, onClose }: RunLaunchModalProps
           project_id: project.id,
           test_suite: suite,
           fail_threshold: threshold,
+          ...(turns !== 8 ? { turns_per_session: turns } : {}),
+          ...(selectedPersonas.length > 0 ? { persona_ids: selectedPersonas } : {}),
           ...(webhook ? { notify_webhook: webhook } : {}),
         },
         token
@@ -138,6 +160,113 @@ export default function RunLaunchModal({ project, onClose }: RunLaunchModalProps
               <span>0 — Lenient</span>
               <span>100 — Strict</span>
             </div>
+          </div>
+
+          {/* Advanced accordion — turns + persona override */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((v) => !v)}
+              className="w-full flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-[#2d3449]"
+              style={{ backgroundColor: "#171f33" }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm" style={{ color: "#8c909f" }}>tune</span>
+                <span className="text-sm font-bold" style={{ color: "#c2c6d6" }}>Advanced</span>
+                {(turns !== 8 || selectedPersonas.length > 0) && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-mono" style={{ backgroundColor: "rgba(173,198,255,0.15)", color: "#adc6ff" }}>
+                    {selectedPersonas.length > 0 ? `${selectedPersonas.length} personas` : ""}{selectedPersonas.length > 0 && turns !== 8 ? " · " : ""}{turns !== 8 ? `${turns} turns` : ""}
+                  </span>
+                )}
+              </div>
+              <span
+                className="material-symbols-outlined text-sm transition-transform"
+                style={{ color: "#8c909f", transform: advancedOpen ? "rotate(180deg)" : "rotate(0)" }}
+              >
+                expand_more
+              </span>
+            </button>
+            {advancedOpen && (
+              <div className="mt-3 space-y-4 p-4 rounded-lg" style={{ backgroundColor: "#131b2e", border: "1px solid rgba(66,71,84,0.2)" }}>
+                {/* Turns per session */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold tracking-widest uppercase" style={{ color: "#adc6ff" }}>
+                      Turns per Session
+                    </label>
+                    <span className="text-base font-space-grotesk font-bold" style={{ color: "#dae2fd" }}>{turns}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={20}
+                    value={turns}
+                    onChange={(e) => setTurns(Number(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-[10px] font-mono" style={{ color: "#424754" }}>
+                    <span>1 — Quick probe</span>
+                    <span>20 — Deep drift</span>
+                  </div>
+                </div>
+
+                {/* Persona multi-select */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold tracking-widest uppercase" style={{ color: "#adc6ff" }}>
+                      Personas {selectedPersonas.length > 0 && (
+                        <span className="font-mono normal-case" style={{ color: "#64748b" }}>(overrides suite)</span>
+                      )}
+                    </label>
+                    {selectedPersonas.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPersonas([])}
+                        className="text-[10px] font-mono uppercase hover:underline"
+                        style={{ color: "#8c909f" }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PERSONAS.map((p) => {
+                      const active = selectedPersonas.includes(p.id);
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => togglePersona(p.id)}
+                          className="p-2 rounded-md text-left transition-all"
+                          style={{
+                            backgroundColor: active ? "rgba(173,198,255,0.15)" : "#171f33",
+                            border: active ? "1px solid #adc6ff" : "1px solid rgba(66,71,84,0.2)",
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="material-symbols-outlined text-sm"
+                              style={{ color: active ? "#adc6ff" : "#424754", fontVariationSettings: active ? "'FILL' 1" : undefined }}
+                            >
+                              {active ? "check_box" : "check_box_outline_blank"}
+                            </span>
+                            <span className="text-xs font-bold" style={{ color: active ? "#adc6ff" : "#dae2fd" }}>
+                              {p.id} · {p.name}
+                            </span>
+                          </div>
+                          <p className="text-[10px] font-mono mt-1 ml-6 truncate" style={{ color: "#64748b" }}>{p.type}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-[10px] font-mono" style={{ color: "#424754" }}>
+                    {selectedPersonas.length === 0
+                      ? "Leave empty to use the selected suite."
+                      : `Will run ${selectedPersonas.length} persona${selectedPersonas.length === 1 ? "" : "s"} instead of the suite.`}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Webhook accordion */}
